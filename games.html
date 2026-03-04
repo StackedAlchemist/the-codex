@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quest Log — Game Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="games.css" />
+</head>
+<body>
+
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <div class="bg-wrap">
+    <div class="bg-main"></div>
+    <div class="bg-fog fog-1"></div>
+    <div class="bg-fog fog-2"></div>
+    <div class="bg-scanlines"></div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="tracker-nav">
+    <a href="index.html" class="nav-back">← The Codex</a>
+    <div class="nav-brand">🎮 Quest Log</div>
+    <div class="nav-actions">
+      <button class="nav-btn" id="addGameBtn">+ Add Game</button>
+    </div>
+  </nav>
+
+  <main class="tracker-main">
+
+    <!-- STATS -->
+    <section class="stats-bar">
+      <div class="stat-card">
+        <span class="sc-num" id="statTotal">0</span>
+        <span class="sc-label">Total Games</span>
+      </div>
+      <div class="stat-card highlight">
+        <span class="sc-num" id="statConquered">0</span>
+        <span class="sc-label">Conquered</span>
+      </div>
+      <div class="stat-card">
+        <span class="sc-num" id="statProgress">0</span>
+        <span class="sc-label">In Progress</span>
+      </div>
+      <div class="stat-card">
+        <span class="sc-num" id="statDeck">0</span>
+        <span class="sc-label">On Deck</span>
+      </div>
+      <div class="stat-card">
+        <span class="sc-num" id="statLeft">0</span>
+        <span class="sc-label">Left Behind</span>
+      </div>
+    </section>
+
+    <!-- SEARCH -->
+    <section class="search-section">
+      <div class="section-label">🔍 Discover Games</div>
+      <div class="search-row">
+        <div class="search-wrap">
+          <input type="text" id="gameSearch" class="search-input" placeholder="Search by title, genre, or studio…" autocomplete="off" />
+          <button class="search-btn" id="searchBtn">Search</button>
+        </div>
+        <div class="quick-searches">
+          <span class="qs-label">Quick:</span>
+          <button class="qs-btn" data-q="elden ring">Elden Ring</button>
+          <button class="qs-btn" data-q="baldurs gate">Baldur's Gate</button>
+          <button class="qs-btn" data-q="civilization">Civilization</button>
+          <button class="qs-btn" data-q="skyrim elder scrolls">Skyrim</button>
+          <button class="qs-btn" data-q="witcher">The Witcher</button>
+          <button class="qs-btn" data-q="dark souls">Dark Souls</button>
+        </div>
+      </div>
+      <div class="api-note">
+        🔑 <strong>To enable live search:</strong> register a free app at <a href="https://dev.twitch.tv/console" target="_blank">dev.twitch.tv/console</a> and paste your Client ID + Secret below. Covers PS5, Xbox, Nintendo, and PC.
+        <div class="api-key-row">
+          <input type="text" id="apiClientId" class="api-key-input" placeholder="Twitch Client ID…" />
+          <input type="text" id="apiClientSecret" class="api-key-input" placeholder="Twitch Client Secret…" />
+          <button class="api-key-save" id="apiKeySave">Save & Connect</button>
+          <span class="api-status" id="apiStatus"></span>
+        </div>
+      </div>
+      <div class="search-results hidden" id="searchResults"></div>
+    </section>
+
+    <!-- QUEST LOG -->
+    <section class="shelf-section">
+      <div class="shelf-header">
+        <div class="section-label">🗡 My Quest Log</div>
+        <div class="shelf-filters">
+          <button class="sf-btn active" data-filter="all">All</button>
+          <button class="sf-btn" data-filter="in-progress">In Progress</button>
+          <button class="sf-btn" data-filter="on-deck">On Deck</button>
+          <button class="sf-btn" data-filter="conquered">Conquered</button>
+          <button class="sf-btn" data-filter="left-behind">Left Behind</button>
+        </div>
+        <select id="shelfSort" class="sort-select">
+          <option value="added">Recently Added</option>
+          <option value="title">Title A–Z</option>
+          <option value="rating">My Rating</option>
+          <option value="genre">Genre</option>
+        </select>
+      </div>
+      <div class="shelf-grid" id="shelfGrid">
+        <div class="empty-shelf">
+          <span class="empty-rune">🎮</span>
+          <p>Your quest log is empty. Search for a game and begin tracking.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CURATED PICKS -->
+    <section class="series-section">
+      <div class="section-label">⭐ Curated Picks — RPG · Strategy · Open World</div>
+      <div class="series-grid" id="curatedGrid"></div>
+    </section>
+
+    <!-- UPCOMING -->
+    <section class="upcoming-section">
+      <div class="section-label">🗓 Upcoming Releases</div>
+      <div class="upcoming-grid" id="upcomingGrid"></div>
+    </section>
+
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div class="modal-cover" id="modalCover"></div>
+      <div class="modal-body">
+        <h2 class="modal-title" id="modalTitle">Add Game</h2>
+        <p class="modal-meta" id="modalMeta"></p>
+
+        <div class="modal-field">
+          <label class="field-label">Status</label>
+          <div class="status-btns" id="statusBtns">
+            <button class="status-btn" data-status="in-progress">In Progress</button>
+            <button class="status-btn active" data-status="on-deck">On Deck</button>
+            <button class="status-btn" data-status="conquered">Conquered</button>
+            <button class="status-btn" data-status="left-behind">Left Behind</button>
+          </div>
+        </div>
+
+        <div class="modal-field">
+          <label class="field-label">My Rating</label>
+          <div class="star-row" id="starRow">
+            <span class="star" data-val="1">★</span>
+            <span class="star" data-val="2">★</span>
+            <span class="star" data-val="3">★</span>
+            <span class="star" data-val="4">★</span>
+            <span class="star" data-val="5">★</span>
+          </div>
+        </div>
+
+        <div class="modal-field">
+          <label class="field-label">Notes / Review</label>
+          <textarea id="modalNotes" class="modal-textarea" placeholder="Thoughts, builds, memorable moments…" rows="3"></textarea>
+        </div>
+
+        <div class="modal-field">
+          <label class="field-label">Hours Played</label>
+          <input type="number" id="modalHours" class="modal-input" placeholder="Hours played" min="0" />
+        </div>
+
+        <div class="modal-actions">
+          <button class="modal-save" id="modalSave">Save to Log</button>
+          <button class="modal-delete hidden" id="modalDelete">Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="games.js"></script>
+</body>
+</html>

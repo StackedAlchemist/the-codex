@@ -1,0 +1,483 @@
+/* ============================================================
+   THE CODEX — Landing Page
+   Books: parchment gold · Games: cyber teal
+   Split screen · Dark fantasy meets cyberpunk
+============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+
+:root {
+  --void:       #06050f;
+  --gold:       #c8852a;
+  --gold-hi:    #e8a83c;
+  --gold-dim:   rgba(200,133,42,0.15);
+  --gold-glow:  rgba(200,133,42,0.25);
+  --teal:       #00ffc8;
+  --teal-hi:    #4fffd8;
+  --teal-dim:   rgba(0,255,200,0.12);
+  --teal-glow:  rgba(0,255,200,0.25);
+  --text:       #ccd6e8;
+  --muted:      #6a7a90;
+  --font-title: 'Cinzel', serif;
+  --font-body:  'Crimson Pro', serif;
+  --font-mono:  'Share Tech Mono', monospace;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Cursor ── */
+.cursor-dot {
+  position: fixed; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--teal); box-shadow: 0 0 10px var(--teal);
+  pointer-events: none; z-index: 99999;
+  transform: translate(-50%,-50%); mix-blend-mode: screen;
+  transition: width .15s, height .15s, background .15s;
+}
+.cursor-ring {
+  position: fixed; width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid rgba(0,255,200,0.35);
+  pointer-events: none; z-index: 99998;
+  transform: translate(-50%,-50%); mix-blend-mode: screen;
+  transition: transform .08s linear;
+}
+
+/* ── Split Screen ── */
+.split-screen {
+  display: flex;
+  flex: 1;
+  min-height: calc(100vh - 44px);
+  position: relative;
+}
+
+/* ── Half Base ── */
+.half {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 3rem 4rem;
+  overflow: hidden;
+  transition: flex .6s cubic-bezier(.4,0,.2,1);
+}
+
+.half:hover { flex: 1.08; }
+
+.half-bg {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+
+.half-noise {
+  position: absolute; inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* ── Books Background ── */
+.books-bg {
+  background:
+    radial-gradient(ellipse 70% 80% at 30% 50%, rgba(200,133,42,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 80% 20%, rgba(200,133,42,0.04) 0%, transparent 60%),
+    linear-gradient(160deg, #0e0a04 0%, #080510 40%, #06050f 100%);
+}
+
+.books-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 60px,
+    rgba(200,133,42,0.012) 60px, rgba(200,133,42,0.012) 61px
+  );
+}
+
+/* ── Games Background ── */
+.games-bg {
+  background:
+    radial-gradient(ellipse 70% 80% at 70% 50%, rgba(0,255,200,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 20% 80%, rgba(0,255,200,0.03) 0%, transparent 60%),
+    linear-gradient(160deg, #06050f 0%, #04100e 40%, #06050f 100%);
+}
+
+.games-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, transparent 19px, rgba(0,255,200,0.018) 19px, rgba(0,255,200,0.018) 20px),
+    linear-gradient(0deg, transparent 19px, rgba(0,255,200,0.018) 19px, rgba(0,255,200,0.018) 20px);
+  background-size: 20px 20px;
+}
+
+/* ── Divider glyph (between halves) ── */
+.divider-glyph {
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 10;
+}
+.glyph-line {
+  width: 1px; height: 80px;
+  background: linear-gradient(180deg, transparent, rgba(200,133,42,0.4), rgba(0,255,200,0.4), transparent);
+}
+.glyph-symbol {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, var(--gold), var(--teal));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: glyph-pulse 4s ease-in-out infinite;
+}
+@keyframes glyph-pulse {
+  0%,100% { opacity: .5; transform: scale(1); }
+  50%      { opacity: 1;  transform: scale(1.2); }
+}
+
+/* ── Half Content ── */
+.half-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.2rem;
+  max-width: 400px;
+  width: 100%;
+}
+
+.half-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.half-icon {
+  font-size: 3.5rem;
+  animation: icon-float 5s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(200,133,42,0.4));
+}
+.games-icon { filter: drop-shadow(0 0 20px rgba(0,255,200,0.4)); animation-delay: -2.5s; }
+
+@keyframes icon-float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+/* ── Titles ── */
+.half-title {
+  font-family: var(--font-title);
+  font-weight: 900;
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  line-height: 0.95;
+  letter-spacing: 0.06em;
+}
+
+.books-title {
+  background: linear-gradient(160deg, #f0d080 0%, var(--gold) 40%, #8b6020 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 30px rgba(200,133,42,0.3));
+  animation: gold-shimmer 6s ease-in-out infinite;
+}
+@keyframes gold-shimmer {
+  0%,100% { filter: drop-shadow(0 0 20px rgba(200,133,42,0.2)); }
+  50%      { filter: drop-shadow(0 0 50px rgba(200,133,42,0.5)); }
+}
+
+.games-title {
+  background: linear-gradient(160deg, #a0ffe8 0%, var(--teal) 40%, #008855 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 30px rgba(0,255,200,0.3));
+  animation: teal-shimmer 6s ease-in-out infinite;
+  animation-delay: -3s;
+}
+@keyframes teal-shimmer {
+  0%,100% { filter: drop-shadow(0 0 20px rgba(0,255,200,0.2)); }
+  50%      { filter: drop-shadow(0 0 50px rgba(0,255,200,0.5)); }
+}
+
+.half-sub {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ── Featured Stack ── */
+.featured-stack {
+  width: 100%;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.books-half .featured-stack { border-color: rgba(200,133,42,0.15); }
+.games-half .featured-stack { border-color: rgba(0,255,200,0.1); }
+
+.stack-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+.books-half .stack-label { color: rgba(200,133,42,0.5); }
+.games-half .stack-label { color: rgba(0,255,200,0.4); }
+
+.shelf-items { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.shelf-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.shelf-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.shelf-name { flex: 1; text-align: left; }
+
+.shelf-status {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.shelf-status.in-progress {
+  color: #f0c060;
+  background: rgba(240,192,96,0.1);
+  border: 1px solid rgba(240,192,96,0.25);
+}
+.shelf-status.conquered {
+  color: #60e090;
+  background: rgba(96,224,144,0.1);
+  border: 1px solid rgba(96,224,144,0.25);
+}
+.shelf-status.on-deck {
+  color: #80b0ff;
+  background: rgba(128,176,255,0.1);
+  border: 1px solid rgba(128,176,255,0.25);
+}
+
+/* ── Enter Button ── */
+.enter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-title);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.85rem 2rem;
+  border-radius: 5px;
+  position: relative;
+  overflow: hidden;
+  transition: all .25s;
+  width: 100%;
+  justify-content: center;
+}
+
+.books-btn {
+  color: var(--gold);
+  border: 1px solid rgba(200,133,42,0.5);
+  background: rgba(200,133,42,0.06);
+}
+.books-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(200,133,42,0.15), rgba(200,133,42,0.05));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .3s ease;
+}
+.books-btn:hover {
+  box-shadow: 0 0 30px rgba(200,133,42,0.3);
+  border-color: var(--gold);
+  color: #f0d080;
+}
+.books-btn:hover::before { transform: scaleX(1); }
+
+.games-btn {
+  color: var(--teal);
+  border: 1px solid rgba(0,255,200,0.4);
+  background: rgba(0,255,200,0.05);
+}
+.games-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(0,255,200,0.12), rgba(0,255,200,0.04));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .3s ease;
+}
+.games-btn:hover {
+  box-shadow: 0 0 30px rgba(0,255,200,0.25);
+  border-color: var(--teal);
+  color: var(--teal-hi);
+}
+.games-btn:hover::before { transform: scaleX(1); }
+
+.btn-arrow { transition: transform .2s; }
+.enter-btn:hover .btn-arrow { transform: translateX(4px); }
+
+/* ── Stat Row ── */
+.half-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+.half-stat { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+.stat-num {
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+}
+.books-half .stat-num { color: var(--gold); }
+.games-half .stat-num { color: var(--teal); }
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.half-stat-div {
+  width: 1px; height: 28px;
+  background: rgba(255,255,255,0.08);
+}
+
+/* ── Footer ── */
+.codex-footer {
+  height: 44px;
+  background: rgba(0,0,0,0.5);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  flex-shrink: 0;
+}
+.footer-brand {
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  background: linear-gradient(90deg, var(--gold), var(--teal));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.footer-copy {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.footer-back {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color .2s;
+}
+.footer-back:hover { color: var(--teal); }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .split-screen { flex-direction: column; min-height: auto; }
+  .half { padding: 2.5rem 1.5rem 3rem; flex: none; min-height: 50vh; }
+  .half:hover { flex: none; }
+  .divider-glyph { display: none; }
+  .codex-footer { padding: 0 1rem; }
+  .footer-copy { display: none; }
+}
+
+/* ============================================================
+   LOCAL STORAGE DISCLAIMER BANNER
+============================================================ */
+
+.local-disclaimer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 215, 0, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.18);
+  border-left: 3px solid rgba(255, 215, 0, 0.5);
+  border-radius: 6px;
+  padding: 0.65rem 1.1rem;
+  margin: 0.75rem 1.5rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 215, 0, 0.65);
+  line-height: 1.5;
+}
+
+/* Vault: fits inside the main-wrap, full width minus sidebar */
+.main-wrap .local-disclaimer {
+  margin: 0.75rem 1.5rem 0;
+}
+
+/* Codex: sits between the split screen and footer */
+.codex-disclaimer {
+  max-width: 900px;
+  margin: 0.5rem auto;
+  justify-content: center;
+  text-align: center;
+  border-left: 1px solid rgba(255, 215, 0, 0.18);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.18);
+  border-radius: 0 0 6px 6px;
+  border-top: none;
+}
+
+.disclaimer-icon {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.disclaimer-text {
+  flex: 1;
+}
+
+@media (max-width: 600px) {
+  .local-disclaimer {
+    margin: 0.5rem 0.75rem;
+    font-size: 0.65rem;
+  }
+}
