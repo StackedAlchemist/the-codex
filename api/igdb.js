@@ -1,0 +1,35 @@
+let cachedToken = null;
+let tokenExpiry  = 0;
+
+async function getToken() {
+  if (cachedToken && Date.now() < tokenExpiry - 60000) return cachedToken;
+  const res  = await fetch(
+    `https://id.twitch.tv/oauth2/token?client_id=${process.env.IGDB_CLIENT_ID}&client_secret=${process.env.IGDB_CLIENT_SECRET}&grant_type=client_credentials`,
+    { method: "POST" }
+  );
+  const data = await res.json();
+  if (!data.access_token) throw new Error("Failed to get IGDB token");
+  cachedToken  = data.access_token;
+  tokenExpiry  = Date.now() + data.expires_in * 1000;
+  return cachedToken;
+}
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  try {
+    const token   = await getToken();
+    const igdbRes = await fetch("https://api.igdb.com/v4/games", {
+      method:  "POST",
+      headers: {
+        "Client-ID":     process.env.IGDB_CLIENT_ID,
+        "Authorization": `Bearer ${token}`,
+        "Content-Type":  "text/plain",
+      },
+      body: typeof req.body === "string" ? req.body : JSON.stringify(req.body),
+    });
+    const games = await igdbRes.json();
+    res.status(200).json(games);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
